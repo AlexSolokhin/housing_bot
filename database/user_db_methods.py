@@ -1,9 +1,7 @@
-from config import db
+from config import db, db_logger
 from database.models import UserModel
 from typing import Optional
-
-# TODO: прописать exceptions
-# TODO: прописать логирования
+from peewee import InternalError
 
 
 async def check_user_exist(tg_id: int) -> bool:
@@ -16,9 +14,12 @@ async def check_user_exist(tg_id: int) -> bool:
     :rtype: bool
     """
 
-    with db:
-        if UserModel.get_or_none(UserModel.tg_id == tg_id):
-            return True
+    try:
+        with db:
+            if UserModel.get_or_none(UserModel.tg_id == tg_id):
+                return True
+    except InternalError as exc:
+        db_logger.error(f'Error while checking user existence: {exc}')
     return False
 
 
@@ -32,9 +33,12 @@ async def check_user_blocked(tg_id: int) -> bool:
     :rtype: bool
     """
 
-    with db:
-        user = UserModel.get(tg_id=tg_id)
-        return user.is_blocked
+    try:
+        with db:
+            user = UserModel.get(tg_id=tg_id)
+            return user.is_blocked
+    except InternalError as exc:
+        db_logger.error(f'Error while checking user is blocked: {exc}')
 
 
 async def check_user_admin(tg_id: int) -> bool:
@@ -47,9 +51,12 @@ async def check_user_admin(tg_id: int) -> bool:
     :rtype: bool
     """
 
-    with db:
-        user = UserModel.get(tg_id=tg_id)
-        return user.is_admin
+    try:
+        with db:
+            user = UserModel.get(tg_id=tg_id)
+            return user.is_admin
+    except InternalError as exc:
+        db_logger.error(f'Error while checking user is admin: {exc}')
 
 
 async def create_user(tg_id: int, tg_username: str, name: str, surname: str, phone: str) -> None:
@@ -68,8 +75,11 @@ async def create_user(tg_id: int, tg_username: str, name: str, surname: str, pho
     :return: None
     """
 
-    with db:
-        UserModel.create(tg_id=tg_id, tg_username=tg_username, name=name, surname=surname, phone=phone)
+    try:
+        with db:
+            UserModel.create(tg_id=tg_id, tg_username=tg_username, name=name, surname=surname, phone=phone)
+    except InternalError as exc:
+        db_logger.error(f'Error while user creation: {exc}')
 
 
 async def get_user_details(tg_id: int) -> dict:
@@ -82,16 +92,19 @@ async def get_user_details(tg_id: int) -> dict:
     :rtype: dict
     """
 
-    with db:
-        user = UserModel.get(tg_id=tg_id)
+    try:
+        with db:
+            user = UserModel.get(tg_id=tg_id)
 
-    user_info = {'username': user.tg_username,
-                 'name': user.name,
-                 'surname': user.surname,
-                 'phone': user.phone,
-                 'is_blocked': user.is_blocked,
-                 'is_admin': user.is_admin}
-    return user_info
+        user_info = {'username': user.tg_username,
+                     'name': user.name,
+                     'surname': user.surname,
+                     'phone': user.phone,
+                     'is_blocked': user.is_blocked,
+                     'is_admin': user.is_admin}
+        return user_info
+    except InternalError as exc:
+        db_logger.error(f'Error while getting user info: {exc}')
 
 
 async def get_all_users() -> list:
@@ -102,11 +115,14 @@ async def get_all_users() -> list:
     :rtype: list
     """
 
-    with db:
-        users = UserModel.select().where(UserModel.is_blocked == 0)
-        users_list = [user.tg_id for user in users]
+    try:
+        with db:
+            users = UserModel.select().where(UserModel.is_blocked == 0)
+            users_list = [user.tg_id for user in users]
 
-    return users_list
+        return users_list
+    except InternalError as exc:
+        db_logger.error(f'Error while getting all users: {exc}')
 
 
 async def get_id_by_username(username: str) -> Optional[int]:
@@ -120,10 +136,13 @@ async def get_id_by_username(username: str) -> Optional[int]:
     if username.startswith('@'):
         username = username[1:]
 
-    with db:
-        user = UserModel.get_or_none(tg_username=username)
-        if user:
-            return user.tg_id
+    try:
+        with db:
+            user = UserModel.get_or_none(tg_username=username)
+            if user:
+                return user.tg_id
+    except InternalError as exc:
+        db_logger.error(f'Error while getting user id by username: {exc}')
 
 
 async def change_name(tg_id: int, new_name: str, new_surname: str) -> None:
@@ -139,9 +158,12 @@ async def change_name(tg_id: int, new_name: str, new_surname: str) -> None:
     :return: None
     """
 
-    with db:
-        update_query = UserModel.update(name=new_name, surname=new_surname).where(tg_id == tg_id)
-        update_query.execute()
+    try:
+        with db:
+            update_query = UserModel.update(name=new_name, surname=new_surname).where(tg_id == tg_id)
+            update_query.execute()
+    except InternalError as exc:
+        db_logger.error(f'Error while changing name: {exc}')
 
 
 async def change_phone(tg_id: int, new_phone: str) -> None:
@@ -155,9 +177,12 @@ async def change_phone(tg_id: int, new_phone: str) -> None:
     :return: None
     """
 
-    with db:
-        update_query = UserModel.update(phone=new_phone).where(tg_id == tg_id)
-        update_query.execute()
+    try:
+        with db:
+            update_query = UserModel.update(phone=new_phone).where(tg_id == tg_id)
+            update_query.execute()
+    except InternalError as exc:
+        db_logger.error(f'Error while changing name: {exc}')
 
 
 async def block_user(tg_id: int) -> None:
@@ -169,9 +194,12 @@ async def block_user(tg_id: int) -> None:
     :return: None
     """
 
-    with db:
-        update_query = UserModel.update(is_blocked=True).where(tg_id == tg_id)
-        update_query.execute()
+    try:
+        with db:
+            update_query = UserModel.update(is_blocked=True).where(tg_id == tg_id)
+            update_query.execute()
+    except InternalError as exc:
+        db_logger.error(f'Error while blocking user: {exc}')
 
 
 async def unblock_user(tg_id: int) -> None:
@@ -183,9 +211,12 @@ async def unblock_user(tg_id: int) -> None:
     :return: None
     """
 
-    with db:
-        update_query = UserModel.update(is_blocked=False).where(tg_id == tg_id)
-        update_query.execute()
+    try:
+        with db:
+            update_query = UserModel.update(is_blocked=False).where(tg_id == tg_id)
+            update_query.execute()
+    except InternalError as exc:
+        db_logger.error(f'Error while unblocking user: {exc}')
 
 
 async def set_admin(tg_id: int) -> None:
@@ -197,6 +228,9 @@ async def set_admin(tg_id: int) -> None:
     :return: None
     """
 
-    with db:
-        update_query = UserModel.update(is_admin=True).where(tg_id == tg_id)
-        update_query.execute()
+    try:
+        with db:
+            update_query = UserModel.update(is_admin=True).where(tg_id == tg_id)
+            update_query.execute()
+    except InternalError as exc:
+        db_logger.error(f'Error while making user an admin: {exc}')

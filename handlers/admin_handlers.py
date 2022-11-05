@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext, filters
-from config import ADMIN_GROUP
+from config import ADMIN_GROUP, admin_logger
 from create_bot import bot
 from states.states_group import FSMAdmin
 from database.user_db_methods import check_user_exist, check_user_blocked, check_user_admin, block_user, unblock_user, \
@@ -73,7 +73,7 @@ async def admin_menu_inline_handler(callback: types.CallbackQuery, state: FSMCon
         await bot.send_message(chat_id, 'Введите Username или ID нужного пользователя.')
 
     else:
-        # TODO Сюда воткнуть логер
+        admin_logger.debug(f'Что-то пошло не так в админском меню. Callback.date: {callback.data}')
         await bot.send_message(chat_id, 'Кажется, что-то пошло не так. Попробуйте повторно вызвать команду '
                                         '<b>/admin</b>',
                                parse_mode='HTML')
@@ -128,13 +128,14 @@ async def mailing_menu_inline_handler(callback: types.CallbackQuery, state: FSMC
         await bot.send_message(chat_id, 'Начинаю рассылку')
         try:
             await send_mass_mailing(mailing_text)
-        except Exception:
+        except Exception as exc:
             await bot.send_message(chat_id, 'Упс! Что-то пошло не так.\n'
                                             'Попробуйте снова или обратитесь в техническую поддержку.')
-            # TODO И сюда лог
+            admin_logger.debug(f'Что-то пошло не так при попытке массовой рассылки. Exception: {exc}')
         finally:
             await callback.answer()
             await state.finish()
+        admin_logger.info(f'Admin {callback.from_user.id} started mass mailing.')
         await bot.send_message(chat_id, 'Рассылка успешно завершена.')
 
     elif callback.data == 'edit_text':
