@@ -10,13 +10,12 @@ else:
     load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+REQUESTS_GROUP = os.getenv('REQUESTS_GROUP')
+IDEA_GROUP = os.getenv('IDEA_GROUP')
+ADMIN_GROUP = os.getenv('ADMIN_GROUP')
 
 db = SqliteDatabase('uer_south')
 
 logging.config.dictConfig(dict_config)
 db_logger = logging.getLogger('db_logger')
 admin_logger = logging.getLogger('admin_logger')
-
-REQUESTS_GROUP = '-816791300'
-IDEA_GROUP = '-816791300'
-ADMIN_GROUP = '-816791300'
