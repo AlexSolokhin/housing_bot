@@ -105,8 +105,8 @@ async def ask_issue_message_handler(message: types.Message, state: FSMContext):
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMRequest
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 

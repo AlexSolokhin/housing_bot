@@ -12,8 +12,8 @@ async def change_name_message_handler(message: types.Message, state: FSMContext)
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMSettings
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 
@@ -24,7 +24,7 @@ async def change_name_message_handler(message: types.Message, state: FSMContext)
         new_name = user_input.split(' ')[0]
         new_surname = user_input.split(' ')[1]
 
-        change_name(tg_id, new_name, new_surname)
+        await change_name(tg_id, new_name, new_surname)
 
         await bot.send_message(tg_id, "🛠️✅🛠️Настройки <b>имени</b> успешно применены!", parse_mode='HTML')
         await state.finish()
@@ -43,8 +43,8 @@ async def change_phone_message_handler(message: types.Message, state: FSMContext
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMSettings
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 
@@ -52,7 +52,7 @@ async def change_phone_message_handler(message: types.Message, state: FSMContext
     user_input = message.text
 
     if await phone_validator(user_input):
-        change_phone(tg_id, user_input)
+        await change_phone(tg_id, user_input)
 
         await bot.send_message(tg_id, "🛠️✅🛠️Настройки <b>номера</b> успешно применены!", parse_mode='HTML')
         await state.finish()

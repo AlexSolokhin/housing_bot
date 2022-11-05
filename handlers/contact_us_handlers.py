@@ -11,8 +11,8 @@ async def check_phone_inline_handler(callback: types.CallbackQuery, state: FSMCo
 
     :param callback: объект CallbackQuery
     :type callback: types.CallbackQuery
-    :param state: текущий стэйт
-    :type: FSMCallMe
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 

@@ -74,7 +74,7 @@ async def send_request_to_admins(tg_id: int,
     :return: None
     """
 
-    user_details = get_user_details(tg_id)
+    user_details = await get_user_details(tg_id)
     username = user_details['username']
     name = user_details['name']
     surname = user_details['surname']

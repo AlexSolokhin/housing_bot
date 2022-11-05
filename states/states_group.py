@@ -62,3 +62,16 @@ class FSMSetName(FSMSettingMenu):
 
 class FSMSetPhone(FSMSettingMenu):
     set_phone = State()
+
+
+'''*****Панель администратора*****'''
+
+
+class FSMAdmin(StatesGroup):
+    admin_action = State()
+    mass_mailing = State()
+    user_info = State()
+    block_user = State()
+    unblock_user = State()
+    set_admin = State()
+    user_chat = State()

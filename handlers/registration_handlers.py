@@ -18,7 +18,7 @@ async def start_command(message: types.Message) -> None:
 
     tg_id = message.from_user.id
 
-    if not check_user_exist(tg_id):
+    if not await check_user_exist(tg_id):
         await FSMRegistration.register_name.set()
         await bot.send_message(tg_id, "☀<b>Доброго времени суток,</b> бот создан, "
                                       "чтобы обрабатывать заявки и обращения пользователей. "
@@ -26,7 +26,7 @@ async def start_command(message: types.Message) -> None:
                                       "<b>Имя</b> и <b>Фамилию</b>",
                                parse_mode="HTML")
 
-    elif check_user_blocked(tg_id):
+    elif await check_user_blocked(tg_id):
         await bot.send_message(tg_id, "К сожалению, вы заблокированы и не можете воспользоваться услугами бота. "
                                       "Для уточнения деталей, обратитесь к администрации.",
                                parse_mode="HTML")
@@ -41,8 +41,8 @@ async def set_name(message: types.Message, state: FSMContext) -> None:
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMRegistration
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 
@@ -73,8 +73,8 @@ async def set_phone(message: types.Message, state: FSMContext) -> None:
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMRegistration
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 
@@ -85,7 +85,7 @@ async def set_phone(message: types.Message, state: FSMContext) -> None:
             name = data['name']
             surname = data['surname']
             phone = message.text
-            create_user(tg_id, tg_username, name, surname, phone)
+            await create_user(tg_id, tg_username, name, surname, phone)
 
         await state.finish()
         await main_menu(tg_id)

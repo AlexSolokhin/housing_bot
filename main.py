@@ -14,7 +14,7 @@ handlers.send_request_handlers.register_requests_handlers(dp)
 handlers.send_idea_handlers.register_idea_handlers(dp)
 handlers.settings_handlers.register_settings_handlers(dp)
 handlers.contact_us_handlers.register_contact_us_handlers(dp)
-
+handlers.admin_handlers.register_admin_handlers(dp)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

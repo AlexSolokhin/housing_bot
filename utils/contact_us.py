@@ -17,7 +17,8 @@ async def check_phone_number(tg_id: int) -> None:
     """
 
     await FSMCallMe.check_number.set()
-    phone_num = get_user_details(tg_id)['phone']
+    user_details = await get_user_details(tg_id)
+    phone_num = user_details['phone']
 
     await bot.send_message(tg_id, f"<b>Это ваш номер телефона</b> {phone_num}? "
                                   f"<i>Если да, нажмите соответствующую кнопку, "
@@ -38,7 +39,7 @@ async def send_call_request_admins(tg_id: int,
     :return: None
     """
 
-    user_details = get_user_details(tg_id)
+    user_details = await get_user_details(tg_id)
     username = user_details['username']
     name = user_details['name']
     surname = user_details['surname']
@@ -82,7 +83,7 @@ async def send_message_to_admin(tg_id: int, message_text: str) -> None:
     :return: None
     """
 
-    user_details = get_user_details(tg_id)
+    user_details = await get_user_details(tg_id)
     username = user_details['username']
     name = user_details['name']
     surname = user_details['surname']
@@ -94,8 +95,7 @@ async def send_message_to_admin(tg_id: int, message_text: str) -> None:
                 f'<b><i>Номер телефона:</i></b> {phone}\n' \
                 f'<b><i>Вопрос::</i></b> {message_text}'
 
-    await bot.send_message(tg_id,
+    await bot.send_message(ADMIN_GROUP,
                            text_line,
                            reply_markup=response_in_chat_keyboard(tg_id),
                            parse_mode='HTML')
-

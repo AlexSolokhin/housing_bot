@@ -1,9 +1,5 @@
-from typing import Optional
-from config import IDEA_GROUP
 from create_bot import bot
 from states.states_group import FSMSetName, FSMSetPhone
-from database.user_db_methods import get_user_details
-from keyboards.navigation_keyboards import back_keyboard
 
 
 async def change_name_message(tg_id: int) -> None:

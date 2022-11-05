@@ -11,8 +11,8 @@ async def request_idea_message_handler(message: types.Message, state: FSMContext
 
     :param message: объект сообщения
     :type message: types.Message
-    :param state: текущий стэйт
-    :type: FSMIdea
+    :param state: стэйт
+    :type: FSMContext
     :return: None
     """
 

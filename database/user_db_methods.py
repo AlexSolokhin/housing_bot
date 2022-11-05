@@ -1,12 +1,12 @@
 from config import db
 from database.models import UserModel
+from typing import Optional
 
 # TODO: прописать exceptions
 # TODO: прописать логирования
-# TODO: уточнить, нужно ли сделать функции асинхронными
 
 
-def check_user_exist(tg_id: int) -> bool:
+async def check_user_exist(tg_id: int) -> bool:
     """
     Проверка на существование юзера
 
@@ -22,7 +22,7 @@ def check_user_exist(tg_id: int) -> bool:
     return False
 
 
-def check_user_blocked(tg_id: int) -> bool:
+async def check_user_blocked(tg_id: int) -> bool:
     """
     Проверка на блокировку пользователя
 
@@ -37,7 +37,7 @@ def check_user_blocked(tg_id: int) -> bool:
         return user.is_blocked
 
 
-def check_user_admin(tg_id: int) -> bool:
+async def check_user_admin(tg_id: int) -> bool:
     """
     Проверка на статус админа
 
@@ -52,7 +52,7 @@ def check_user_admin(tg_id: int) -> bool:
         return user.is_admin
 
 
-def create_user(tg_id: int, tg_username: str, name: str, surname: str, phone: str) -> None:
+async def create_user(tg_id: int, tg_username: str, name: str, surname: str, phone: str) -> None:
     """
     Создание нового пользователя
 
@@ -72,7 +72,7 @@ def create_user(tg_id: int, tg_username: str, name: str, surname: str, phone: st
         UserModel.create(tg_id=tg_id, tg_username=tg_username, name=name, surname=surname, phone=phone)
 
 
-def get_user_details(tg_id: int) -> dict:
+async def get_user_details(tg_id: int) -> dict:
     """
     Получение информации о пользователе
 
@@ -88,11 +88,45 @@ def get_user_details(tg_id: int) -> dict:
     user_info = {'username': user.tg_username,
                  'name': user.name,
                  'surname': user.surname,
-                 'phone': user.phone}
+                 'phone': user.phone,
+                 'is_blocked': user.is_blocked,
+                 'is_admin': user.is_admin}
     return user_info
 
 
-def change_name(tg_id: int, new_name: str, new_surname: str) -> None:
+async def get_all_users() -> list:
+    """
+    Получение списка всех незаблокированных пользователей
+
+    :return: список незаблокированных пользователей
+    :rtype: list
+    """
+
+    with db:
+        users = UserModel.select().where(UserModel.is_blocked == 0)
+        users_list = [user.tg_id for user in users]
+
+    return users_list
+
+
+async def get_id_by_username(username: str) -> Optional[int]:
+    """
+    Получаем id пользователя по его username
+    :param username: имя пользователя в Tg
+    :type username: str
+    :return: id пользователя в Tg или None
+    :rtype: Optional[int]
+    """
+    if username.startswith('@'):
+        username = username[1:]
+
+    with db:
+        user = UserModel.get_or_none(tg_username=username)
+        if user:
+            return user.tg_id
+
+
+async def change_name(tg_id: int, new_name: str, new_surname: str) -> None:
     """
     Изменение имени пользователя
 
@@ -110,7 +144,7 @@ def change_name(tg_id: int, new_name: str, new_surname: str) -> None:
         update_query.execute()
 
 
-def change_phone(tg_id: int, new_phone: str) -> None:
+async def change_phone(tg_id: int, new_phone: str) -> None:
     """
     Изменение телефона пользователя
 
@@ -126,43 +160,43 @@ def change_phone(tg_id: int, new_phone: str) -> None:
         update_query.execute()
 
 
-def block_user(tg_username: str) -> None:
+async def block_user(tg_id: int) -> None:
     """
     Блокировка пользователя. Лишает права использовать бота.
 
-    :param tg_username: id юзера в Telegram
-    :type tg_username: str
+    :param tg_id: id юзера в Telegram
+    :type tg_id: int
     :return: None
     """
 
     with db:
-        update_query = UserModel.update(is_blocked=True).where(tg_username == tg_username)
+        update_query = UserModel.update(is_blocked=True).where(tg_id == tg_id)
         update_query.execute()
 
 
-def unblock_user(tg_username: str) -> None:
+async def unblock_user(tg_id: int) -> None:
     """
     разблокировка пользователя.
 
-    :param tg_username: id юзера в Telegram
-    :type tg_username: str
+    :param tg_id: id юзера в Telegram
+    :type tg_id: int
     :return: None
     """
 
     with db:
-        update_query = UserModel.update(is_blocked=False).where(tg_username == tg_username)
+        update_query = UserModel.update(is_blocked=False).where(tg_id == tg_id)
         update_query.execute()
 
 
-def set_admin(tg_username: str) -> None:
+async def set_admin(tg_id: int) -> None:
     """
     Даёт пользователю админские права
 
-    :param tg_username: id юзера в Telegram
-    :type tg_username: str
+    :param tg_id: id юзера в Telegram
+    :type tg_id: int
     :return: None
     """
 
     with db:
-        update_query = UserModel.update(is_admin=True).where(tg_username == tg_username)
+        update_query = UserModel.update(is_admin=True).where(tg_id == tg_id)
         update_query.execute()
